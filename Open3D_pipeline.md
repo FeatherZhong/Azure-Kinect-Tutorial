@@ -16,7 +16,7 @@ When create the pose graph, the register_one_rgbd_pair function is used to compu
 
 run_system.py -> make_fragments.py -> run() -> process_single_fragment() -> make_pose_graph_for_fragment() -> create two classes graph and write into files -> optimize_posegraph_for_fragment -> make_pointcloud_for_fragment().
 
-
+'''
 run_system.py
 └── make_fragments.py
     ├── run()
@@ -24,7 +24,7 @@ run_system.py
         ├── make_posegraph_for_fragment()
         ├── optimize_posegraph_for_fragment()
         └── make_pointcloud_for_fragment()
-
+'''
 注：**这里需要改成树状图的形式**
 
 #### 2. Register fragments
