@@ -13,37 +13,14 @@ When create the pose graph, the register_one_rgbd_pair function is used to compu
 [[Choi2015\]](http://www.open3d.org/docs/release/tutorial/reference.html#choi2015) has observed that pairwise registration is error-prone. False pairwise alignments can outnumber correctly aligned pairs. Thus, they partition pose graph edges into two classes. **Odometry edges** connect temporally close, neighboring nodes. A local registration algorithm such as ICP can reliably align them. **Loop closure edges** connect any non-neighboring nodes. The alignment is found by [global registration](http://www.open3d.org/docs/release/tutorial/Advanced/global_registration.html#global-registration) and is less reliable.
 
 **The code pipeline of - Make fragments:**
+- run_system.py
+  - make_fragments.py
+    - run()
+      - process_single_fragment()
+      - make_posegraph_for_fragment()
+      - optimize_posegraph_for_fragment()
+      - make_pointcloud_for_fragment()
 
-run_system.py -> make_fragments.py -> run() -> process_single_fragment() -> make_pose_graph_for_fragment() -> create two classes graph and write into files -> optimize_posegraph_for_fragment -> make_pointcloud_for_fragment().
-
-'''
-run_system.py
-└── make_fragments.py
-    ├── run()
-    └── process_single_fragment()
-        ├── make_posegraph_for_fragment()
-        ├── optimize_posegraph_for_fragment()
-        └── make_pointcloud_for_fragment()
-
-
-├── _config.yml
-├── _drafts
-|   ├── begin-with-the-crazy-ideas.textile
-|   └── on-simplicity-in-technology.markdown
-├── _includes
-|   ├── footer.html
-|   └── header.html
-├── _layouts
-|   ├── default.html
-|   └── post.html
-├── _posts
-|   ├── 2007-10-29-why-every-programmer-should-play-nethack.textile
-|   └── 2009-04-26-barcamp-boston-4-roundup.textile
-├── _data
-|   └── members.yml
-├── _site
-└── index.html
-注：**这里需要改成树状图的形式**
 
 #### 2. Register fragments
 
