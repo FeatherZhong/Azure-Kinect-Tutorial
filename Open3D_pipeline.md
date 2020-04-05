@@ -23,7 +23,7 @@ When create the pose graph, the `register_one_rgbd_pair()` function is used to c
 
 
 #### 2. Register fragments
-This step align the fragments created from step1 in a global space. At first, Open3D read the `.ply` and `.json` file pairs which contain fragments and pose graphs, then we compute the alignment between any two fragments using the function `compute_initial_registration`.If two fragments are adjacent, the rough alignments is determined by an aggregating RGBD odometry obtained from step1 using [ICP registration](http://www.open3d.org/docs/release/tutorial/Basic/icp_registration.html#icp-registration), on the contrary, we call `register_point_cloud_fpfh` using RANSAC or [Fast global registration](http://www.open3d.org/docs/release/tutorial/Advanced/fast_global_registration.html#fast-global-registration) which is less reliable to perform global registration.
+This step align the fragments created from step1 in a global space. At first, Open3D read the `.ply` and `.json` file pairs which contain fragments and pose graphs created from step1, then we compute the alignment between any two fragments using the function `compute_initial_registration`.If two fragments are adjacent, the rough alignments is determined by an aggregating RGBD odometry obtained from step1 using [ICP registration](http://www.open3d.org/docs/release/tutorial/Basic/icp_registration.html#icp-registration), on the contrary, we call `register_point_cloud_fpfh` using RANSAC or [Fast global registration](http://www.open3d.org/docs/release/tutorial/Advanced/fast_global_registration.html#fast-global-registration) which is less reliable to perform global registration.
 
 After we compute the transformations between fragments, the function `update_posegrph_for_scene` builds a pose graph for multiway registration of all fragments.The nodes is fragments which is typically geometries (e.g., point clouds or RGBD images)  $\{P_{i}\}$ associated with a pose matrix $\{T_{i}\}$ which transforms $\{P_{i}\}$ into the global space.
 
@@ -42,5 +42,32 @@ Once a pose graph is built the fuction `optimize_posegraph_for_scene` is called 
       - optimize_posegraph_for_scene()
 
 #### 3. Refine registration
+This step refine the fragments pairs detected from step2. At first Open3D read the pose graph created from step2, then we use function `local_refinement` to refine the transformation between fragments using ICP.
+After we refine the transformations between fragments, the function `update_posegrph_for_refined_scene` builds a pose graph for multiway registration of all fragments just like step2.
 
+Once a pose graph is built, function `optimize_posegraph_for_scene` is called for multiway registration.
+
+
+
+**The code pipeline of - Refine registration:**
+- run_system.py
+  - refine_registration.py
+    - run()
+      - make_posegraph_for_refined_scene()
+        - register_point_cloud_pair()
+          - local_refinement()
+            - multiscale_icp()
+      - optimize_posegraph_for_refined_scene()
 #### 4. Integrate scene
+This step Integrate all RGBD images into a single TSDF volume. At first open3d read the fragment pose graphs created from steps above, then for each fragment we compute the frames associated with it. For each frames we compute camera pose $P_{c}$ by $P_{c}=P_{fragment}*P_{rgbd}$, and integrate into TSDF volume uing function `volume.integrate`.
+Finally, open3d extract a mesh and trajectory log as the result.
+
+
+**The code pipeline of - Integrate scene:**
+- run_system.py
+  - integrate_scene.py
+    - run()
+      - scalable_integrate_rgb_frames()
+      - read_pose_graph()
+      - extract_triangle_mesh()
+      - write_poses_to_log()
