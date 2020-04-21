@@ -29,13 +29,14 @@ When create the pose graph, the `register_one_rgbd_pair()` function is used to c
 | max_depth  | 超过此深度值的深度将被设为零  | 3  |
 | max_depth_diff  | 最大深度差<br>Maximum depth difference to be considered as correspondence. In depth image domain, if two aligned pixels have a depth difference less than specified value, they are considered as a correspondence. Larger value induce more aggressive search, but it is prone to unstable result.  | 0.07 |
 | optimization method   | pose graph 优化算法| GlobalOptimizationLevenbergMarquardt | GlobalOptimizationLevenbergMarquardt<br>GlobalOptimizationConvergenceCriteria|
-| tsdf_cubic_size |   |  3.0 |   |
+| tsdf_cubic_size | a single voxel size for TSDF volume |  3.0 |  Lowering this value makes a high-resolution TSDF volume |
 
 | 算法 | 用在哪了 | 含义 |
 |  ----  | ----  | ---- |
 | ORB 特征 | 若两帧不是连续帧，先求解帧之间RT | 计算帧之间的关键点匹配 |
 | 5-point RANSAC | 若两帧不是连续帧，先求解帧之间RT | 求解帧之间的相机运动 |
 | compute rgbd odometry [[Park2017]](http://www.open3d.org/docs/release/tutorial/reference.html#park2017) | 计算帧之间RT | 计算帧之间RT  |
+| RGBD integration 算法  | 生成每个fragment的3d mesh  |  一种利用rgbd图像和相机位姿RT生成3d mesh的算法[[Curless1996]](http://www.open3d.org/docs/release/tutorial/reference.html#curless1996) |
 
 
 #### 2. Register fragments
@@ -74,7 +75,7 @@ Once a pose graph is built the fuction `optimize_posegraph_for_scene` is called 
 | Colored point cloud registration  |  计算相邻fragment之间的RT | 一种ICP配准算法[[Park2017]](http://www.open3d.org/docs/release/tutorial/reference.html#park2017)  |
 
 #### 3. Refine registration
-This step refine the fragments pairs detected from step2. At first Open3D read the pose graph created from step2, then we use function `local_refinement` to refine the transformation between fragments using ICP.
+This step refine the fragments pairs detected from step2. At first Open3D read the pose graph created from step2, then we use function `local_refinement` to refine the transformation between fragments linked by edge using ICP .
 After we refine the transformations between fragments, the function `update_posegrph_for_refined_scene` builds a pose graph for multiway registration of all fragments just like step2.
 
 Once a pose graph is built, function `optimize_posegraph_for_scene` is called for multiway registration.
@@ -93,13 +94,14 @@ Once a pose graph is built, function `optimize_posegraph_for_scene` is called fo
 
 | 参数 | 含义 | 默认值 | 可选参数及含义 |
 |  :----:  | ----  | :----: | ---- |
-| icp_method  | 计算fragment之间的RT  |  color |  color  |
+| icp_method  | 计算fragment之间的RT  |  color |  color[Colored point cloud registration](http://www.open3d.org/docs/release/tutorial/Advanced/colored_pointcloud_registration.html?highlight=registration_colored_icp#multi-scale-geometric-color-alignment)<br> point_to_point[Point-to-point ICP](http://www.open3d.org/docs/release/tutorial/Basic/icp_registration.html#point-to-point-icp)<br> point_to_plane[Point-to-plane ICP](http://www.open3d.org/docs/release/tutorial/Basic/icp_registration.html#point-to-plane-icp)  |
 
 
 | 算法 | 用在哪了 | 含义 |
 |  ----  | ----  | ---- |
-| ICP 算法Colored Point Cloud Registration Revisited | 对齐两个彩色点云的算法 | 对齐两个彩色点云的算法 |
-| 5-point RANSAC | 若两帧不是连续帧，先求解帧之间RT | 求解帧之间的相机运动 |
+| Point-to-point ICP | 计算相邻fragment之间的RT  | 一种ICP配准算法 [[beslandmckay1992]](http://www.open3d.org/docs/release/tutorial/reference.html#beslandmckay1992)  |
+| Point-to-plane ICP | 计算相邻fragment之间的RT  | 一种ICP配准算法 [[ChenAndMedioni1992]](http://www.open3d.org/docs/release/tutorial/reference.html#chenandmedioni1992)  |
+| Colored point cloud registration  |  计算相邻fragment之间的RT | 一种ICP配准算法[[Park2017]](http://www.open3d.org/docs/release/tutorial/reference.html#park2017)  |
 #### 4. Integrate scene
 This step Integrate all RGBD images into a single TSDF volume. At first open3d read the fragment pose graphs created from steps above, then for each fragment we compute the frames associated with it. For each frames we compute camera pose $P_{c}$ by $P_{c}=P_{fragment}*P_{rgbd}$, and integrate into TSDF volume uing function `volume.integrate`.
 Finally, open3d extract a mesh and trajectory log as the result.
@@ -113,3 +115,12 @@ Finally, open3d extract a mesh and trajectory log as the result.
       - read_pose_graph()
       - extract_triangle_mesh()
       - write_poses_to_log()
+
+
+| 参数 | 含义 | 默认值 | 可选参数及含义 |
+|  :----:  | ----  | :----: | ---- |
+| tsdf_cubic_size | a single voxel size for TSDF volume  |  3.0 |  Lowering this value makes a high-resolution TSDF volume |
+
+| 算法 | 用在哪了 | 含义 |
+|  ----  | ----  | ---- |
+| RGBD integration 算法  | 最终生成整个重建场景的3d mesh  |  一种利用rgbd图像和相机位姿RT生成3d mesh的算法[[Curless1996]](http://www.open3d.org/docs/release/tutorial/reference.html#curless1996) |
