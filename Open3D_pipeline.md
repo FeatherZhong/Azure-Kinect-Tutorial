@@ -35,7 +35,7 @@ When create the pose graph, the `register_one_rgbd_pair()` function is used to c
 |  ----  | ----  | ---- |
 | ORB 特征 | 若两帧不是连续帧，先求解帧之间RT | 计算帧之间的关键点匹配 |
 | 5-point RANSAC | 若两帧不是连续帧，先求解帧之间RT | 求解帧之间的相机运动 |
-| compute rgbd odometry [[Park2017]](http://www.open3d.org/docs/release/tutorial/reference.html#park2017) | 计算帧之间RT | 计算帧之间RT  |
+| compute rgbd odometry  | 计算帧之间RT | 计算帧之间RT [[Park2017]](http://www.open3d.org/docs/release/tutorial/reference.html#park2017)  |
 | RGBD integration 算法  | 生成每个fragment的3d mesh  |  一种利用rgbd图像和相机位姿RT生成3d mesh的算法[[Curless1996]](http://www.open3d.org/docs/release/tutorial/reference.html#curless1996) |
 
 
